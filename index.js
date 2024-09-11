@@ -1,12 +1,21 @@
 const { select, input, checkbox } = require("@inquirer/prompts");
 
-let mensagem = "Bem vindo ao controle de metas!"
-let meta = {
-  value: "Tomar 3L de água por dia",
-  checked: false,
+const fs = require("fs").promises
+
+let mensagem = "Bem vindo ao controle de metas!";
+
+const carregarMetas = async () => {
+  try {
+    const dados = await fs.readFile("metas.json", "utf-8");
+    metas = Json.parse(dados);
+  } catch (erro) {
+    metas = [];
+  }
 };
 
-let metas = [meta];
+const salvarMetas = async () => {
+  await fs.writeFile("metas.json", JSON.stringify(metas, null, 2))
+}
 
 const cadastrarMeta = async () => {
   const meta = await input({ message: "Digite a meta:" });
@@ -123,22 +132,23 @@ const deletarMetas = async () => {
 };
 
 const mostrarMensagem = () => {
-  
   console.clear();
-  
-  if(mensagem != ""){
-    console.log(mensagem)
-    console.log("")
-    mensagem = ""
+
+  if (mensagem != "") {
+    console.log(mensagem);
+    console.log("");
+    mensagem = "";
   }
-}
+};
 
 //array
 const start = async () => {
-  
+  await carregarMetas();
+
   while (true) {
-    mostrarMensagem()
-    
+    mostrarMensagem();
+    await salvarMetas()
+
     const opcao = await select({
       message: "Menu > ",
       choices: [
@@ -173,6 +183,7 @@ const start = async () => {
     switch (opcao) {
       case "cadastrar":
         await cadastrarMeta();
+        await salvarMetas();
         break;
 
       case "cadastrar":
@@ -181,6 +192,7 @@ const start = async () => {
 
       case "listar":
         await listarMetas();
+        await salvarMetas();
         break;
 
       case "realizadas":
